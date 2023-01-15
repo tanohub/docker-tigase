@@ -1,0 +1,85 @@
+version: "3.5"
+
+services:
+
+  xmpp-db:
+    image: mysql:5.7
+    container_name: ${COMPOSE_PROJECT_NAME}_xmpp-db
+    command: --default-authentication-plugin=mysql_native_password --sql_mode="ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+    environment:
+      MYSQL_ROOT_PASSWORD: Password123
+    ports:
+      - '3306:3306'
+    volumes:
+      # mysql init DB and users
+      - ./provision/mysql/init:/docker-entrypoint-initdb.d
+      # mysql data bind mount
+      - ./data/mysql:/var/lib/mysql
+      # force local timezone
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+  xmpp-adminer:
+    image: adminer:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_xmpp-adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: xmpp-db
+    ports:
+      - '8081:8080'
+    volumes:
+      # force local timezone      
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - xmpp-db
+
+  xmpp-server:
+    image: tigase:7.1
+    build:
+      context: build/tigase
+    container_name: ${COMPOSE_PROJECT_NAME}_xmpp-server
+#    environment:
+    ports:
+      - "8080:8080"
+      - "5222:5222"
+      - "5223:5223"
+      - "5269:5269"
+      - "5270:5270"
+      - "5277:5277"
+      - "5280:5280"
+      - "5281:5281"
+      - "5290:5290"
+      - "5291:5291"
+      - "9050:9050"
+      - "9070:9070"
+    volumes:
+      - "./data/scripts/start-endpoint.sh:/start-endpoint.sh"
+      - "./data/scripts/db-create-mysql-v2.sh:/opt/tigase/tigase-server/scripts/db-create-mysql-v2.sh"
+      - "./data/tigase-server/etc/init.properties:/opt/tigase/tigase-server/etc/init.properties"
+      - "./data/tigase-server/etc/tigase.conf:/opt/tigase/tigase-server/etc/tigase.conf"
+#      - "./data/tigase-server/certs:/opt/tigase/tigase-server/certs"
+#      - "./data/tigase-server/etc:/opt/tigase/tigase-server/etc"
+#      - "./data/tigase-server/conf:/opt/tigase/tigase-server/conf"
+#      - "./data/tigase-server/data:/opt/tigase/tigase-server/data"
+#      - "./data/tigase-server/logs:/opt/tigase/tigase-server/logs"
+#      - "./data/tigase-server/tigasedb:/opt/tigase/tigase-server/tigasedb"
+      # force local timezone
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - xmpp-adminer
+
+#  xmpp-web:
+#    image: nioc/xmpp-web:latest
+#    container_name: ${COMPOSE_PROJECT_NAME}_xmpp-web
+#    environment:
+#      - APP_WS=wss://xmpp-server:5290/
+#      - APP_DEFAULT_DOMAIN=tigase.net
+#    ports:
+#      - '80:80'
+#    volumes:
+#      # force local timezone      
+#      - "/etc/timezone:/etc/timezone:ro"
+#      - "/etc/localtime:/etc/localtime:ro"
+#    depends_on:
+#      - xmpp-server
