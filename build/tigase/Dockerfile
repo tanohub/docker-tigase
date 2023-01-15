@@ -9,7 +9,7 @@ MAINTAINER "Tigase, Inc." <support@tigase.net>
 RUN mkdir /opt/tigase \
 	&& cd /opt/tigase \
 	&& apt-get update \
-	&& apt-get install -y --no-install-recommends wget nano vi less more net-tools telnet inetutils-ping psutils lsof \
+	&& apt-get install -y --no-install-recommends wget nano vim less net-tools telnet inetutils-ping psutils lsof \
 	&& wget https://github.com/tigase/tigase-server/releases/download/tigase-server-7.1.0/tigase-server-7.1.0-b4379-dist-max.tar.gz \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& tar -zxvf tigase-server-7.1.0-b4379-dist-max.tar.gz  \

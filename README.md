@@ -1,10 +1,18 @@
 ## Tigase docker PoC
 
 - docker-compose build
-- Set DBPREP=1 in data/scripts/start-endpoint.sh for DB preparation ( DB\user creation ), xmpp-server container will go in infinite sleep after
-- stop all containers
+- Set DBPREP=1 in data/scripts/start-endpoint.sh for DB creation and tigase DB preparation 
+- docker-compose up ( xmpp-server container will go in infinite sleep after instead of running tigase services )
+- Stop all containers
 - Set DBPREP=0 in data/scripts/start-endpoint.sh for tigase server start 
-
+- docker-compose up ( xmpp-server container will launch tigase services )
+- Create users via tigase DB stored procedures in tigase DB ( admin users must reflect the ones in data/tigase-server/etc/init.properties, ex: --admins=admin@tigase.net )
+```
+MySQL root@localhost:(none)> use tigasedb;
+MySQL root@localhost:tigasedb> call TigAddUserPlainPw('admin@tigase.net','Password123');
+MySQL root@localhost:tigasedb> call TigAddUserPlainPw('user01@tigase.net','Password123');
+MySQL root@localhost:tigasedb> call TigAddUserPlainPw('user02@tigase.net','Password123');
+```
 
 # Services :
 
